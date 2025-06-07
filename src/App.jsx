@@ -12,7 +12,7 @@ const ExpenseManager = () => {
   });
 
    useEffect(() => {
-    fetch('http://localhost:5000/api/expenses') // Replace with your actual backend URL
+    fetch('https://expense-manager-backend-6u2x.vercel.app/api/expenses') // Replace with your actual backend URL
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch expenses');
@@ -59,7 +59,7 @@ const ExpenseManager = () => {
     date: new Date(formData.date)  // Ensure date is in Date format
   };
 
-  fetch('http://localhost:5000/api/expenses/add', {
+  fetch('https://expense-manager-backend-6u2x.vercel.app/api/expenses/add', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
