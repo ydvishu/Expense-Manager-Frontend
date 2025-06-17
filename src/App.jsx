@@ -377,26 +377,25 @@ const ExpenseManager = () => {
   const Analytics = () => {
     const analyticsData = useMemo(() => {
       const monthlyData = {};
-      
-      expenses.forEach(expense => {
-        const date = new Date(expense.date);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        const monthLabel = date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short' });
-        
+
+      expenses.forEach(exp => {
+        const parsedDate = new Date(exp.date);
+        if (isNaN(parsedDate)) return; // skip invalid dates
+
+        const monthKey = `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}`;
+        const monthLabel = parsedDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short' });
+
         if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = {
-            month: monthLabel,
-            Rental: 0,
-            Groceries: 0,
-            Entertainment: 0,
-            Travel: 0,
-            Others: 0
-          };
+          monthlyData[monthKey] = { month: monthLabel };
+          categories.forEach(cat => {
+            monthlyData[monthKey][cat] = 0;
+          });
         }
-        
-        monthlyData[monthKey][expense.category] += expense.amount;
+
+        const cat = exp.category && categories.includes(exp.category) ? exp.category : 'Others';
+        monthlyData[monthKey][cat] += exp.amount;
       });
-      
+
       return Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
     }, [expenses]);
 
@@ -425,17 +424,14 @@ const ExpenseManager = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(value) => `₹${value.toLocaleString('en-IN')}`} />
-                  <Tooltip 
-                    formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, '']}
-                    labelFormatter={(label) => `Month: ${label}`}
-                  />
+                  <Tooltip formatter={value => [`₹${value.toLocaleString('en-IN')}`, '']} labelFormatter={label => `Month: ${label}`} />
                   <Legend />
                   {categories.map(category => (
                     <Bar 
                       key={category} 
                       dataKey={category} 
                       stackId="expenses" 
-                      fill={categoryColors[category]}
+                      fill={categoryColors[category]} 
                     />
                   ))}
                 </BarChart>
@@ -447,6 +443,7 @@ const ExpenseManager = () => {
     );
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
